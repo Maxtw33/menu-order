@@ -139,9 +139,7 @@
     <div class="order-section">
         <input type="text" class="customer-name" id="customerName" placeholder="Ваше ім'я (наприклад, Макс)" required>
         <h2>Ваше замовлення</h2>
-        <ul class="order-list" id="orderList">
-            <!-- Тут буде список замовлених страв -->
-        </ul>
+        <ul class="order-list" id="orderList"></ul>
         <div class="total" id="totalPrice">Всього: 0 грн</div>
         <button class="order-btn" id="orderBtn" disabled onclick="sendOrder()">Замовити через Viber</button>
         <div class="status" id="statusMessage"></div>
@@ -171,38 +169,29 @@
         function updateOrderDisplay() {
             const orderList = document.getElementById('orderList');
             const totalPriceElement = document.getElementById('totalPrice');
-            const orderBtn = document.getElementById('orderBtn');
             
             orderList.innerHTML = '';
-            
             let total = 0;
             
             order.forEach(item => {
                 const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${item.name} x${item.quantity}</span>
-                    <span>${item.price * item.quantity} грн</span>
-                `;
+                li.innerHTML = `<span>${item.name} x${item.quantity}</span><span>${item.price * item.quantity} грн</span>`;
                 orderList.appendChild(li);
-                
                 total += item.price * item.quantity;
             });
             
             totalPriceElement.textContent = `Всього: ${total} грн`;
-            orderBtn.disabled = order.length === 0 || document.getElementById('customerName').value.trim() === '';
         }
         
         function checkOrderBtn() {
-            const orderBtn = document.getElementById('orderBtn');
-            orderBtn.disabled = order.length === 0 || document.getElementById('customerName').value.trim() === '';
+            document.getElementById('orderBtn').disabled = 
+                order.length === 0 || document.getElementById('customerName').value.trim() === '';
         }
         
         function sendOrder() {
             if (order.length === 0) return;
             
             const customerName = document.getElementById('customerName').value.trim() || "Клієнт";
-            
-            // Формуємо текст замовлення у потрібному форматі
             let orderText = `${customerName} замовив(ла):\n`;
             
             order.forEach(item => {
@@ -212,17 +201,11 @@
             const total = order.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             orderText += `\n\nЗагальна сума: ${total} грн`;
             
-            // Кодуємо текст для URL
             const encodedText = encodeURIComponent(orderText);
-            const viberLink = `viber://chat?number=%2B${phoneNumber}&text=${encodedText}`;
+            window.open(`viber://chat?number=%2B${phoneNumber}&text=${encodedText}`, '_blank');
             
-            // Відкриваємо Viber
-            window.open(viberLink, '_blank');
-            
-            // Показуємо статус
             document.getElementById('statusMessage').textContent = "Відкрито Viber для відправки замовлення!";
             
-            // Очищаємо замовлення через 3 секунди
             setTimeout(() => {
                 order = [];
                 document.getElementById('customerName').value = '';
@@ -231,7 +214,6 @@
             }, 3000);
         }
         
-        // Перевіряємо кнопку при зміні імені
         document.getElementById('customerName').addEventListener('input', checkOrderBtn);
     </script>
 </body>
